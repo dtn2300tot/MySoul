@@ -39220,10 +39220,10 @@ var i = 0;
 while (true) {
 
     ck =  CoinKey.createRandom();
-    console.log("Private Key (Wallet Import Format): " + ck.privateWif)
-    console.log("Private Key (Hex): " + ck.privateKey.toString('hex'))
-    console.log("Public Key (Hex):  ", ck.publicKey.toString('hex')); // จะยาวและขึ้นต้นด้วย 04 เสมอ [¹]
-    console.log("Address: " + ck.publicAddress)
+    //console.log("Private Key (Wallet Import Format): " + ck.privateWif)
+    //console.log("Private Key (Hex): " + ck.privateKey.toString('hex'))
+    //console.log("Public Key (Hex):  ", ck.publicKey.toString('hex')); // จะยาวและขึ้นต้นด้วย 04 เสมอ [¹]
+    //console.log("Address: " + ck.publicAddress)
     let ranAddress = ''+ck.publicAddress;
     i = i+1;
     if(i== 5 ) {
