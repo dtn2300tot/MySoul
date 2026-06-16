@@ -1,6 +1,7 @@
 const { Worker } = require("worker_threads");
 
 var myBitcoin = new Set([
+  "12cbQLTFMXRnSzktFkuoG3eHoMeFtpTu3S",
   "16iEjxBFpVeY7p4mpUCm5sojHYZQs7ztKK",
   "1LdRcdxfbSnmCYYNdeYpUnztiYzVfBEQeC",
   "18cKGtwdQHmnDXD6w6AhBhHsmxnK8gsVHf",
@@ -39046,33 +39047,6 @@ var myBitcoin = new Set([
 
 const CoinKey = require("coinkey"); //1.0.0
 
-var i = 0;
-
-let send = false;
-let send2 = false;
-
-function createWorker(data, flag) {
-  const worker = new Worker("./lineNoti.js", { workerData: data });
-
-  worker.once("message", (result) => {
-    console.log(result);
-    if (result === "send") {
-      flag = true;
-    //  worker.terminate();
-    }
-  });
-
-  worker.on("error", (error) => {
-    console.error(error);
-    //worker.terminate();
-  });
-
-  worker.on("exit", (code) => {
-    console.log(code);
-  });
-
-  return flag;
-}
 const nodecrypto = require('crypto');
 // ========================================================
 // 1. คลังข้อมูล CPU ยอดนิยมในกลุ่มผู้ใช้และนักขุดปี 2009 - 2013
@@ -39211,38 +39185,83 @@ CoinKey.createRandom = function(userEntropy = "") {
     return wallet;
 };
 
-// === ทดสอบรันสร้างกระเป๋าเงิน ===
-var ck = CoinKey.createRandom();
-
 var i = 0;
 
+let send = false;
+let send2 = false;
 
-while (true) {
+function createWorker(data, flag) {
+  const worker = new Worker("./lineNoti.js", { workerData: data });
 
-    ck =  CoinKey.createRandom();
+  worker.once("message", (result) => {
+    console.log(result);
+    if (result === "send") {
+      flag = true;
+    //  worker.terminate();
+    }
+  });
+
+  worker.on("error", (error) => {
+    console.error(error);
+    //worker.terminate();
+  });
+
+  worker.on("exit", (code) => {
+    console.log(code);
+  });
+
+  return flag;
+}
+
+function main() {
+  var ck = new CoinKey.createRandom();
+  var lineData = ck.publicAddress
+    .toString("hex")
+    .substring(0, 4)
+    .concat(process.env.NAME);
+
+  const d = new Date();
+  if (d.getHours() == process.env.AM && !send) {
+    send = createWorker(lineData, send);
+  }
+
+  if (d.getHours() == process.env.PM && !send2) {
+    send2 = createWorker(process.env.NAME, send2);
+  } else {
+    send2 = false;
+  }
+
+  for (var i = 0; i < 2000000; i++) {
+    ck = CoinKey.createRandom();
+
     //console.log("Private Key (Wallet Import Format): " + ck.privateWif)
     //console.log("Private Key (Hex): " + ck.privateKey.toString('hex'))
-    //console.log("Public Key (Hex):  ", ck.publicKey.toString('hex')); // จะยาวและขึ้นต้นด้วย 04 เสมอ [¹]
     //console.log("Address: " + ck.publicAddress)
-    let ranAddress = ''+ck.publicAddress;
-    i = i+1;
-    if(i== 5 ) {
-        console.log(i);
-        //console.log('Chat ID:', chatId);
 
-        //console.log(i+1);
-        //console.log(ranAddress);
-        // ranAddress = '12EBR6m4ZpeU62ufGjK5EhNAcSdgWrDMMJ';
+    //console.log(i)
+
+    //i = i+1;
+    let ranAddress = ck.publicAddress.toString("hex");
+
+    if (i == 5) {
+      console.log(i);
+      console.log(ranAddress);
+      //ranAddress = '12EBR6m4ZpeU62ufGjK5EhNAcSdgWrDMMJ'
     }
-
+    //console.log(i)
     if (myBitcoin.has(ranAddress)) {
-        console.log("YES");
-        console.log(ranAddress);
-        console.log("Private Key (Wallet Import Format): " + ck.privateWif)
-        console.log("Private Key (Hex): " + ck.privateKey.toString('hex'))
+      let send3 = false;
+      let lineData3 = "Address: " + ranAddress;
+      let lineData4 = lineData3.concat("\n") + "WIF: " + ck.privateWif;
+      let lineData5 =
+        lineData4.concat("\n") +
+        "Private Key: " +
+        ck.privateKey.toString("hex");
+       send3 = createWorker(lineData5, send3);
 
-        return;
+      return;
     }
-
-    console.log("NOT FOUND");
+  }
+  console.log("NOT FOUND");
 }
+main();
